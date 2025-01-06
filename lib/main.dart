@@ -5,11 +5,14 @@ import 'pages/settings_page.dart';
 import 'pages/calendar_page.dart';
 import 'widgets/daily_box.dart';
 import 'package:intl/intl.dart';
+import 'models/event.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 
 void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
+  Hive.registerAdapter(EventAdapter());
   runApp(MyApp());
 }
 

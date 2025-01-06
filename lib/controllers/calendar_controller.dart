@@ -1,32 +1,30 @@
+import 'package:hive/hive.dart';
 import '../models/event.dart';
 
 class CalendarController {
-  final List<Event> _events = []; // Liste interne des événements
+  Box<Event>? _eventBox;
 
-  List<Event> get events => _events;
+  // Ouvrir la boîte Hive pour les événements
+  Future<void> openBox() async {
+    _eventBox = await Hive.openBox<Event>('events'); // Nom de la boîte
+  }
 
   // Ajouter un événement
-  void addEvent(Event event) {
-    _events.add(event);
+  Future<void> addEvent(Event event) async {
+    await _eventBox?.add(event); // Ajoute l'événement dans la boîte
   }
 
-  // Supprimer un événement
-  void removeEvent(Event event) {
-    _events.remove(event);
+  // Récupérer tous les événements
+  List<Event> getEvents() {
+    return _eventBox?.values.toList() ?? []; // Récupère tous les événements
   }
 
-  // Obtenir les événements pour une date spécifique
-  List<Event> getEventsForHour(DateTime hour) {
-    return events.where((event) =>
-    event.startTime.isBefore(hour.add(Duration(hours: 1))) &&
-        event.endTime.isAfter(hour)).toList();
-  }
-
+  // Récupérer les événements pour une date donnée
   List<Event> getEventsForDate(DateTime date) {
-    return events.where((event) =>
-    event.startTime.year == date.year &&
-        event.startTime.month == date.month &&
-        event.startTime.day == date.day &&
-        event.startTime.hour == date.hour).toList();
+    return _eventBox?.values.where((event) {
+      return event.startTime.year == date.year &&
+          event.startTime.month == date.month &&
+          event.startTime.day == date.day;
+    }).toList() ?? [];
   }
 }
