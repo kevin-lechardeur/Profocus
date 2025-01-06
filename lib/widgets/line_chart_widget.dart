@@ -28,7 +28,35 @@ class LineChartWidget extends StatelessWidget {
           gridData: FlGridData(show: false),
           borderData: FlBorderData(
             show: true,
-            border: Border.all(color: Colors.black, width: 2),
+            border: Border(
+              bottom: BorderSide(color: Colors.grey, width: 3),
+              left: BorderSide(color: Colors.grey, width: 3),
+            ),
+          ),
+          extraLinesData: ExtraLinesData(
+            horizontalLines: [
+              HorizontalLine(
+                y: 8, // Ligne au milieu
+                color: Colors.grey.withOpacity(0.5),
+                label: HorizontalLineLabel(
+                  show: false,
+                ),
+              ),
+              HorizontalLine(
+                y: 12,
+                color: Colors.grey.withOpacity(0.75),
+                label: HorizontalLineLabel(
+                  show: false,
+                ),
+              ),
+              HorizontalLine(
+                y: 16, // Ligne tout en haut
+                color: Colors.grey.withOpacity(1),
+                label: HorizontalLineLabel(
+                  show: false,
+                ),
+              ),
+            ],
           ),
           lineBarsData: [
             LineChartBarData(
@@ -38,15 +66,72 @@ class LineChartWidget extends StatelessWidget {
                 FlSpot(2, 6),
                 FlSpot(3, 8),
                 FlSpot(4, 4),
-                FlSpot(5, 12),
+                FlSpot(5, 10),
                 FlSpot(6, 16),
               ],
               isCurved: true,
+              barWidth: 4,
               color: Colors.blue,
+              dotData: FlDotData(show: true),
             ),
           ],
+          titlesData: FlTitlesData(
+            topTitles: AxisTitles(sideTitles:SideTitles(showTitles: false)),
+            leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            bottomTitles: AxisTitles(sideTitles: _bottomTitles(dateLabels)),
+            rightTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 40,
+                interval: 1,
+                getTitlesWidget: (double value, TitleMeta meta) {
+                  double maxY = 16;
+                  double middleY = maxY / 2;
+                  double middleYx = (maxY + middleY) / 2;
+                  if (value == 0 || value == middleY || value == maxY || value == middleYx) {
+                    return Padding(
+                      padding: const EdgeInsets.only(left: 8.0),
+                      child: Text(
+                        value.toInt().toString(),
+                        style: const TextStyle(fontSize: 12, color: Colors.black),
+                      ),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
+            ),
+          ),
         ),
       ),
     );
   }
 }
+SideTitles _bottomTitles(List<String> labels) => SideTitles(
+    showTitles: true,
+    reservedSize: 22,
+    interval: 1,
+    getTitlesWidget: (value, meta) {
+      int index = value.toInt();
+      if (index >= 0 && index < labels.length) {
+        switch (value.toInt()) {
+          case 0:
+            return Padding(
+              padding: const EdgeInsets.only(left: 16.0),
+              child:  Text(labels[0]),
+            );
+          case 3:
+            return Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child:  Text(labels[3]),
+            );
+          case 6:
+            return Padding(
+              padding: const EdgeInsets.only(right: 16.0),
+              child:  Text(labels[6]),
+            );
+        }
+      }
+      return Text('');
+    }
+);

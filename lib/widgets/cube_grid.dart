@@ -25,7 +25,7 @@ class _CubeGridState extends State<CubeGrid> {
 
     return Container(
       margin: EdgeInsets.symmetric(horizontal: horizontalPadding),
-      decoration: BoxDecoration(color: Colors.black),
+      decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(8)),
       child: Container(
         height: gridHeight,
         padding: const EdgeInsets.all(8.0),

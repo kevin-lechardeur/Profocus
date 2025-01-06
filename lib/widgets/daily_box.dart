@@ -1,20 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'dart:developer' as developer;
+
 
 class DailyBox extends StatelessWidget {
   final String day;
-
-  DailyBox(this.day);
+  final bool isToday; // Indique si c'est le jour actuel
+  DailyBox(this.day, {this.isToday = false});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      alignment: Alignment.center,
+  alignment: Alignment.center,
       width: 40,
       height: 40,
       child: Text(
         day,
         style: TextStyle(
-          color: Colors.white,
+          color: isToday ? Colors.deepOrangeAccent : Colors.white,
           fontWeight: FontWeight.bold,
         ),
       ),

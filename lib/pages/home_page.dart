@@ -22,7 +22,9 @@ class HomePage extends StatelessWidget {
             ),
           ),
           Container(height: 200, child: LineChartWidget()),
-          CubeGrid(),
+          Container( child:
+              CubeGrid()
+          ),
         ],
       ),
     );
