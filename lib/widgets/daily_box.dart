@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'dart:developer' as developer;
 
 
 class DailyBox extends StatelessWidget {

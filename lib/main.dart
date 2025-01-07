@@ -1,48 +1,69 @@
 import 'package:flutter/material.dart';
 import 'pages/home_page.dart';
-import 'pages/performance_page.dart';
+import 'pages/explore_page.dart';
 import 'pages/settings_page.dart';
 import 'pages/calendar_page.dart';
 import 'widgets/daily_box.dart';
 import 'package:intl/intl.dart';
 import 'models/event.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:hive/hive.dart';
+import 'models/user.dart';
+import 'controllers/user_controller.dart';
+import 'controllers/calendar_controller.dart';
+import 'controllers/appcontroller.dart';
 
-
-void main() async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
   Hive.registerAdapter(EventAdapter());
+  Hive.registerAdapter(UserAdapter());
+  await Hive.openBox<User>('user');
+  await Hive.openBox<Event>('event');
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
   @override
+  final UserController userController = UserController();
+  final CalendarController calendarController = CalendarController();
+  final AppController appController = AppController();
+
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'ProFocus',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: MainScreen(),
+      home: MainScreen(userController: userController, calendarController: calendarController, appController: appController),
     );
   }
 }
 
 class MainScreen extends StatefulWidget {
+  final UserController userController;
+  final CalendarController calendarController;
+  final AppController appController;
+
+  MainScreen({required this.userController, required this.calendarController, required this.appController});
+
   @override
   _MainScreenState createState() => _MainScreenState();
 }
 
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
-
   // Liste des pages
-  final List<Widget> _pages = [
-    HomePage(),
-    CalendarPage(),
-    PerformancePage(),
-    SettingsPage(),
-  ];
+  late final List<Widget> _pages;
+  @override
+  void initState() {
+    super.initState();
+    _pages = [
+      HomePage(userController: widget.userController),
+      CalendarPage(calendarController : widget.calendarController, appController: widget.appController),
+      ExplorePage(),
+      SettingsPage(),
+    ];
+  }
 
   // Changement de page
   void _onItemTapped(int index) {
@@ -73,7 +94,7 @@ class _MainScreenState extends State<MainScreen> {
                 DailyBox('mer.', isToday: today == 'Wednesday'),
                 DailyBox('jeu.', isToday: today == 'Thursday'),
                 DailyBox('ven.', isToday: today == 'Friday'),
-                DailyBox('sam.',  isToday: today == 'Saturday'),
+                DailyBox('sam.', isToday: today == 'Saturday'),
                 DailyBox('dim.', isToday: today == 'Sunday'),
               ],
             ),

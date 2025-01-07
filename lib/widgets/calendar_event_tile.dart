@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import '../controllers/calendar_controller.dart';
-
 import '../models/event.dart';
 
 class CalendarEventTile extends StatelessWidget {
   final Event event;
   final VoidCallback onDelete;
   final VoidCallback onToggleCompletion;
-  final CalendarController _controller = CalendarController();
-
+  final CalendarController calendarController;
   CalendarEventTile({
     required this.event,
     required this.onDelete,
     required this.onToggleCompletion,
+    required this.calendarController,
   });
 
   @override
@@ -21,9 +20,9 @@ class CalendarEventTile extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
       child: ListTile(
         title: Text(
-        _controller.getTitle(event),
+          calendarController.getTitle(event),
           style: TextStyle(
-            decoration: _controller.isEventFinished(event) ? TextDecoration.lineThrough : null,
+            decoration: calendarController.isEventFinished(event) ? TextDecoration.lineThrough : null,
           ),
         ),
         trailing: Row(
@@ -31,8 +30,9 @@ class CalendarEventTile extends StatelessWidget {
           children: [
             IconButton(
               icon: Icon(
-                _controller.isEventFinished(event) ? Icons.check_circle : Icons.check_circle_outline,
-                color: Colors.green,
+                calendarController.isEventFinished(event) ?
+                Icons.check_circle :
+                Icons.check_circle_outline, color: Colors.green,
               ),
               onPressed: onToggleCompletion,
             ),

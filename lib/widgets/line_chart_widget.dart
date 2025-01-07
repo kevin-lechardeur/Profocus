@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
-import 'dart:developer' as developer;
+import '../controllers/user_controller.dart';
+import '../models/user.dart';
 
 class LineChartWidget extends StatelessWidget {
+  final UserController userController;
+
+  LineChartWidget({required this.userController});
+
   List<String> _generateDateLabels() {
     List<String> dateLabels = [];
     DateTime today = DateTime.now();
-
     dateLabels.add(DateFormat('MMM dd').format(today));
 
     for (int i = 1; i <= 6; i++) {
@@ -15,12 +19,27 @@ class LineChartWidget extends StatelessWidget {
       dateLabels.add(DateFormat('MMM dd').format(previousDay));
     }
 
-    return dateLabels.reversed.toList();
+    return dateLabels.toList();
+  }
+
+  List<FlSpot> _generateSpots() {
+    List<FlSpot> spots = [];
+    DateTime today = DateTime.now();
+    for (int i = 0; i <= 6; i++) {
+      DateTime targetDate = today.subtract(Duration(days: 6 - i)); // Inversé l'ordre des jours
+      int actions = userController.getActionsByDate(targetDate);
+      spots.add(FlSpot(i.toDouble(), actions.toDouble()));
+    }
+
+    return spots; // Plus besoin de reverse()
   }
 
   @override
   Widget build(BuildContext context) {
     List<String> dateLabels = _generateDateLabels();
+    List<FlSpot> spots = _generateSpots();
+    print(spots);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
       child: LineChart(
@@ -33,42 +52,28 @@ class LineChartWidget extends StatelessWidget {
               left: BorderSide(color: Colors.grey, width: 3),
             ),
           ),
-          extraLinesData: ExtraLinesData(
+         /* extraLinesData: ExtraLinesData(
             horizontalLines: [
               HorizontalLine(
-                y: 8, // Ligne au milieu
+                y: 2,
                 color: Colors.grey.withOpacity(0.5),
-                label: HorizontalLineLabel(
-                  show: false,
-                ),
+                label: HorizontalLineLabel(show: false),
               ),
               HorizontalLine(
                 y: 12,
                 color: Colors.grey.withOpacity(0.75),
-                label: HorizontalLineLabel(
-                  show: false,
-                ),
+                label: HorizontalLineLabel(show: false),
               ),
               HorizontalLine(
-                y: 16, // Ligne tout en haut
+                y: 16,
                 color: Colors.grey.withOpacity(1),
-                label: HorizontalLineLabel(
-                  show: false,
-                ),
+                label: HorizontalLineLabel(show: false),
               ),
             ],
-          ),
+          ),*/
           lineBarsData: [
             LineChartBarData(
-              spots: [
-                FlSpot(0, 1),
-                FlSpot(1, 4),
-                FlSpot(2, 6),
-                FlSpot(3, 8),
-                FlSpot(4, 4),
-                FlSpot(5, 10),
-                FlSpot(6, 16),
-              ],
+              spots: spots,
               isCurved: true,
               barWidth: 4,
               color: Colors.blue,
@@ -76,10 +81,10 @@ class LineChartWidget extends StatelessWidget {
             ),
           ],
           titlesData: FlTitlesData(
-            topTitles: AxisTitles(sideTitles:SideTitles(showTitles: false)),
+            topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
             leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
             bottomTitles: AxisTitles(sideTitles: _bottomTitles(dateLabels)),
-            rightTitles: AxisTitles(
+            /*rightTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
                 reservedSize: 40,
@@ -100,38 +105,40 @@ class LineChartWidget extends StatelessWidget {
                   return const SizedBox.shrink();
                 },
               ),
-            ),
+            ),*/
           ),
         ),
       ),
     );
   }
 }
+
 SideTitles _bottomTitles(List<String> labels) => SideTitles(
-    showTitles: true,
-    reservedSize: 22,
-    interval: 1,
-    getTitlesWidget: (value, meta) {
-      int index = value.toInt();
-      if (index >= 0 && index < labels.length) {
-        switch (value.toInt()) {
-          case 0:
-            return Padding(
-              padding: const EdgeInsets.only(left: 16.0),
-              child:  Text(labels[0]),
-            );
-          case 3:
-            return Padding(
-              padding: const EdgeInsets.only(left: 8.0),
-              child:  Text(labels[3]),
-            );
-          case 6:
-            return Padding(
-              padding: const EdgeInsets.only(right: 16.0),
-              child:  Text(labels[6]),
-            );
-        }
+  showTitles: true,
+  reservedSize: 22,
+  interval: 1,
+  getTitlesWidget: (value, meta) {
+    int index = value.toInt();
+    if (index >= 0 && index < labels.length) {
+      switch (index) {
+        case 0:
+          return Padding(
+            padding: const EdgeInsets.only(left: 16.0),
+            child: Text(labels[0]),
+          );
+        case 3:
+          return Padding(
+            padding: const EdgeInsets.only(left: 8.0),
+            child: Text(labels[3]),
+          );
+        case 6:
+          return Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: Text(labels[6]),
+          );
       }
-      return Text('');
     }
+    return const SizedBox.shrink();
+  },
 );
+

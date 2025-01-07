@@ -4,14 +4,19 @@ import '../models/event.dart';
 class CalendarController {
   Box<Event>? _eventBox;
 
+
   // Ouvrir la boîte Hive pour les événements
   Future<void> openBox() async {
     _eventBox = await Hive.openBox<Event>('events'); // Nom de la boîte
   }
 
   Future<void> addEvent(Event event) async {
-    CheckEventOverlap(event);
-    await _eventBox?.add(event);
+    if (getEventsForDate(getEventDate(event)).length == 0) {
+      await _eventBox?.add(event);
+    }else{
+      checkEventOverlap(event);
+      await _eventBox?.add(event);
+    }
   }
 
   // Récupérer tous les événements
@@ -23,6 +28,7 @@ class CalendarController {
   }
   // Récupérer l'index d'un événement
   int? getEventIndex(Event event) {
+
     final index = _eventBox?.values.toList().indexOf(event);
     return (index != null && index >= 0) ? index : null;
   }
@@ -34,6 +40,10 @@ class CalendarController {
           event.startTime.month == date.month &&
           event.startTime.day == date.day;
     }).toList() ?? [];
+  }
+  // Récupérer la date d'un évenements
+  DateTime getEventDate(Event event) {
+    return event.startTime;
   }
   // Supprimer un événement
   Future<void> deleteEvent(Event event) async {
@@ -85,7 +95,7 @@ class CalendarController {
     }
   }
 
-  void CheckEventOverlap(Event event) {
+  void checkEventOverlap(Event event) {
     List<Event> events = getEventsForDate(event.startTime);
     for (Event e in events) {
       if (e != event) {
