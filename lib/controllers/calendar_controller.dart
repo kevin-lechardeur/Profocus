@@ -27,4 +27,14 @@ class CalendarController {
           event.startTime.day == date.day;
     }).toList() ?? [];
   }
+
+  // Supprimer un événement
+  Future<void> deleteEvent(Event event) async {
+    // Chercher l'index de l'événement dans la boîte
+    final eventIndex = _eventBox?.values.toList().indexOf(event);
+    if (eventIndex != null && eventIndex >= 0) {
+      // Supprimer l'événement en utilisant l'index
+      await _eventBox?.deleteAt(eventIndex);
+    }
+  }
 }
