@@ -3,7 +3,7 @@ import 'package:hive/hive.dart';
 part 'event.g.dart';
 
 @HiveType(typeId: 0)
-class Event {
+class Event extends HiveObject{
   @HiveField(0)
   String title;
 
@@ -33,4 +33,10 @@ class Event {
 
   @override
   int get hashCode => startTime.hashCode ^ endTime.hashCode ^ title.hashCode ^ isFinished.hashCode;
+
+  void updateEventIsFinished() {
+    this.isFinished = !this.isFinished;
+    save(); // Sauvegarde automatique après modification
+  }
+
 }

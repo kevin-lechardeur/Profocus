@@ -3,16 +3,18 @@ import '../controllers/calendar_controller.dart';
 import '../models/event.dart';
 
 class CalendarEventTile extends StatelessWidget {
+
   final Event event;
   final VoidCallback onDelete;
   final VoidCallback onToggleCompletion;
   final CalendarController calendarController;
   CalendarEventTile({
+    Key? key,
     required this.event,
     required this.onDelete,
     required this.onToggleCompletion,
     required this.calendarController,
-  });
+  }): super(key: key);
 
   @override
   Widget build(BuildContext context) {

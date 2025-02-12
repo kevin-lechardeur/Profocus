@@ -1,71 +1,98 @@
 import 'package:flutter/material.dart';
-import 'pages/home_page.dart';
-import 'pages/explore_page.dart';
-import 'pages/settings_page.dart';
-import 'pages/calendar_page.dart';
+import 'package:provider/provider.dart'; // Ajout de l'import Provider
+import 'package:project/models/habit.dart';
+import 'package:project/pages/history_page.dart';
+import 'package:project/pages/profile_page.dart';
+import 'package:project/pages/tendance_page.dart';
+import 'widgets/custom_bottom_navigation.dart';
 import 'widgets/daily_box.dart';
 import 'package:intl/intl.dart';
-import 'models/event.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hive/hive.dart';
-import 'models/user.dart';
 import 'controllers/user_controller.dart';
 import 'controllers/calendar_controller.dart';
 import 'controllers/appcontroller.dart';
+import 'controllers/habit_controller.dart';
+import 'controllers/transaction_controller.dart';
+import 'models/event.dart';
+import 'models/user.dart';
+import 'models/habit.dart';
+import 'models/transaction.dart';
+import 'models/transaction_category.dart';
+import 'models/transaction_category_adapter.dart';
+import 'pages/transaction_page.dart';
+import 'pages/home_page.dart';
+import 'pages/settings_page.dart';
+import 'pages/calendar_page.dart';
+import 'pages/history_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
+  Hive.registerAdapter(TransactionCategoryAdapter());
   Hive.registerAdapter(EventAdapter());
   Hive.registerAdapter(UserAdapter());
+  Hive.registerAdapter(HabitAdapter());
+  Hive.registerAdapter(TransactionAdapter());
   await Hive.openBox<User>('user');
   await Hive.openBox<Event>('event');
-  runApp(MyApp());
+  await Hive.openBox<Habit>('habit');
+  await Hive.openBox<Transaction>('transaction');
+
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AppController()), // Ajout du Provider
+      ],
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
   @override
-  final UserController userController = UserController();
-  final CalendarController calendarController = CalendarController();
-  final AppController appController = AppController();
-
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'ProFocus',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: MainScreen(userController: userController, calendarController: calendarController, appController: appController),
+    // Utilisation du Consumer pour obtenir l'instance de AppController
+    return Consumer<AppController>(
+      builder: (context, appController, _) {
+        return MaterialApp(
+          title: 'ProFocus',
+          debugShowCheckedModeBanner: false,
+          theme: appController.currentTheme, // Appliquer dynamiquement le thème
+          home: MainScreen(),
+        );
+      },
     );
   }
 }
 
 class MainScreen extends StatefulWidget {
-  final UserController userController;
-  final CalendarController calendarController;
-  final AppController appController;
-
-  MainScreen({required this.userController, required this.calendarController, required this.appController});
-
   @override
   _MainScreenState createState() => _MainScreenState();
 }
 
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
-  // Liste des pages
   late final List<Widget> _pages;
+
   @override
   void initState() {
     super.initState();
     _pages = [
-      HomePage(userController: widget.userController),
-      CalendarPage(calendarController : widget.calendarController, appController: widget.appController),
-      ExplorePage(),
-      SettingsPage(),
+      HomePage(habitController: HabitController()),
+      TendancePage(userController: UserController()),
+      CalendarPage(
+        calendarController: CalendarController(),
+        appController: AppController(),
+      ),
+      TransactionPage(transactionController: TransactionController()),
+      ProfilePage(
+        habitController: HabitController(),
+        transactionController: TransactionController(),
+      ),
     ];
   }
 
-  // Changement de page
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -79,13 +106,24 @@ class _MainScreenState extends State<MainScreen> {
       appBar: AppBar(
         title: Text('ProFocus'),
         centerTitle: true,
+
+        actions: [
+          IconButton(
+            icon: Icon(Icons.settings),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SettingsPage()),
+              );
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [
-          // Barre des jours toujours visible
           Container(
             height: 50,
-            color: Colors.black,
+
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -100,36 +138,13 @@ class _MainScreenState extends State<MainScreen> {
             ),
           ),
           Expanded(
-            // Contenu dynamique selon l'index sélectionné
             child: _pages[_selectedIndex],
           ),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
+      bottomNavigationBar: CustomBottomNavigation(
         currentIndex: _selectedIndex,
-        backgroundColor: Colors.black,
-        selectedItemColor: Colors.deepOrangeAccent,
-        unselectedItemColor: Colors.white,
         onTap: _onItemTapped,
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_today),
-            label: 'Calender',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart),
-            label: 'Performance',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
-        ],
       ),
     );
   }

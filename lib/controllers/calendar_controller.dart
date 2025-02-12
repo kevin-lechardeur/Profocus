@@ -1,34 +1,45 @@
+import 'dart:io';
+
 import 'package:hive/hive.dart';
 import '../models/event.dart';
 
 class CalendarController {
   Box<Event>? _eventBox;
 
-
-  // Ouvrir la boîte Hive pour les événements
   Future<void> openBox() async {
-    _eventBox = await Hive.openBox<Event>('events'); // Nom de la boîte
+    _eventBox = await Hive.openBox<Event>('events');
   }
 
   Future<void> addEvent(Event event) async {
-    if (getEventsForDate(getEventDate(event)).length == 0) {
       await _eventBox?.add(event);
-    }else{
-      checkEventOverlap(event);
-      await _eventBox?.add(event);
-    }
+      //print('Event added  ${event.title}');
+      //print('Event added  ${event.startTime}');
   }
 
-  // Récupérer tous les événements
   List<Event> getEvents() {
-    return _eventBox?.values.toList() ?? []; // Récupère tous les événements
+    return _eventBox?.values.toList() ?? [];
   }
   String getTitle(Event event) {
     return event.title;
   }
+  Future<void> clearEvents() async {
+    await _eventBox?.clear();
+  }
+  Future<void> updateEventOrder(List<Event> updatedEvents) async {
+    if (updatedEvents.isEmpty) return;
+    try {
+      for (var event in updatedEvents) {
+        await deleteEvent(event);
+      }
+      for (var event in updatedEvents) {
+        await addEvent(event);
+      }
+    } catch (e) {
+      print("Erreur lors de la mise à jour de l'ordre des événements: $e");
+    }
+  }
   // Récupérer l'index d'un événement
   int? getEventIndex(Event event) {
-
     final index = _eventBox?.values.toList().indexOf(event);
     return (index != null && index >= 0) ? index : null;
   }
@@ -45,84 +56,29 @@ class CalendarController {
   DateTime getEventDate(Event event) {
     return event.startTime;
   }
+
   // Supprimer un événement
   Future<void> deleteEvent(Event event) async {
     final eventIndex = _eventBox?.values.toList().indexOf(event);
     if (eventIndex != null && eventIndex >= 0) {
       await _eventBox?.deleteAt(eventIndex);
-      mergeEventsIfNeeded(event);
     }
   }
-
-  // Fusionner les événements s'ils ont le même titre
-  void mergeEventsIfNeeded(Event deletedEvent) {
-    final events = getEventsForDate(deletedEvent.startTime);
-    events.sort((a, b) => a.startTime.compareTo(b.startTime));
-    for (int i = 0; i < events.length - 1; i++) {
-      final currentEvent = events[i];
-      final nextEvent = events[i + 1];
-      if (currentEvent.title == nextEvent.title) {
-        Event mergedEvent = Event(
-          title: currentEvent.title,
-          startTime: currentEvent.startTime,
-          endTime: nextEvent.endTime,
-        );
-        deleteEvent(currentEvent);
-        deleteEvent(nextEvent);
-        addEvent(mergedEvent);
-        break;
-      }
-    }
-  }
-
-  void splitEventIfOverlap(Event firstEvent, Event secondEvent) {
-    if (firstEvent.startTime.isBefore(secondEvent.endTime) && firstEvent.endTime.isAfter(secondEvent.startTime)) {
-      if (firstEvent.startTime.isBefore(secondEvent.startTime)) {
-        Event firstPart = Event(
-          title: firstEvent.title,
-          startTime: firstEvent.startTime,
-          endTime: secondEvent.startTime,
-        );
-        Event secondPart = Event(
-          title: firstEvent.title,
-          startTime: secondEvent.endTime,
-          endTime: firstEvent.endTime,
-        );
-        deleteEvent(firstEvent);
-        addEvent(firstPart);
-        addEvent(secondPart);
-      }
-    }
-  }
-
-  void checkEventOverlap(Event event) {
-    List<Event> events = getEventsForDate(event.startTime);
-    for (Event e in events) {
-      if (e != event) {
-        if (e.startTime.isBefore(event.endTime) && e.endTime.isAfter(event.startTime)) {
-          splitEventIfOverlap(e, event); // Découper l'événement e
-        }
-        if (event.startTime.isBefore(e.endTime) && event.endTime.isAfter(e.startTime)) {
-          splitEventIfOverlap(event, e); // Découper l'événement event
-        }
-      }
-    }
-  }
-  Future<void> toogleEventFinished(Event event) async {
-    final eventIndex = getEventIndex(event);
-    if (eventIndex == null) {
-      return ;
-    } else {
-      Event updatedEvent = Event(
-        title: event.title,
-        startTime: event.startTime,
-        endTime: event.endTime,
-        isFinished: !event.isFinished,
-      );
-      await _eventBox?.putAt(eventIndex, updatedEvent);
-    }
-  }
+  // Mettre à jour un événement
   bool isEventFinished(Event event) {
     return event.isFinished;
+  }
+  Future<void> EventBool(Event event) async {
+    if (!event.isInBox) {
+      print("⚠️ L'événement '${event.title}' n'est pas encore enregistré dans Hive, ajout en cours...");
+      var box = Hive.box<Event>('events');
+      int key = await box.add(event); // Ajoute l'événement dans Hive
+      event = box.get(key)!; // Récupère l'objet depuis Hive
+    } else {
+      print("✅ L'événement '${event.title}' est bien enregistré dans Hive.");
+    }
+
+    event.updateEventIsFinished(); // Mise à jour de l'état
+    await event.save(); // Sauvegarde dans Hive
   }
 }

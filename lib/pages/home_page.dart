@@ -1,184 +1,106 @@
 import 'package:flutter/material.dart';
-import '../widgets/line_chart_widget.dart';
-import '../widgets/cube_grid.dart';
-import '../controllers/user_controller.dart';
+import '../models/habit.dart';
+import '../widgets/habit_box.dart';
+import '../controllers/habit_controller.dart';
+import '../widgets/add_habit.dart';
 
 class HomePage extends StatefulWidget {
-  final UserController userController;
-
-  HomePage({required this.userController});
+  final HabitController habitController;
+  HomePage({required this.habitController});
 
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  bool userExists = false;
-  String userName = '';
-  bool isLoading = false; // Pour afficher un indicateur de chargement lors de la création d'un utilisateur
+  late Future<List<Habit>> habits = Future.value([]); // Initialisation avec une liste vide
+  bool _isDeleteMode = false; // Ajouter un booléen pour activer/désactiver le mode suppression
 
   @override
   void initState() {
     super.initState();
-    _checkUserExists();
+    widget.habitController.openBox().then((_) {
+      _loadHabits();
+    });
   }
 
-  // Vérifier si un utilisateur existe
-  Future<void> _checkUserExists() async {
-    await widget.userController.openBox();
+  void _loadHabits() {
     setState(() {
-      userExists = widget.userController.isUserAlreadyExists();
-      if (userExists) {
-        userName = widget.userController.getUserName(); // Récupérer le nom de l'utilisateur si disponible
-      }
+      habits = widget.habitController.getHabit();
+    });
+  }
+
+  void _toggleDeleteMode() {
+    setState(() {
+      _isDeleteMode = !_isDeleteMode; // Inverser le mode suppression
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            child: Column(
-              children: [
-                Align(
-                  alignment: Alignment(-0.8, 0.0),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: Text(
-                      'Performance-Day',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-                Container(height: 200, child: LineChartWidget(userController: widget.userController)),
-                Container(child: CubeGrid()),
-              ],
-            ),
+      appBar: AppBar(
+        title: Text("Habits"),
+        actions: [
+          IconButton(
+            icon: Icon(_isDeleteMode ? Icons.close : Icons.delete),
+            onPressed: _toggleDeleteMode,
           ),
-          // Si l'utilisateur existe, afficher son nom dans un box
-          if (userExists)
-            Align(
-              alignment: Alignment.bottomRight,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Container(
-                  padding: EdgeInsets.symmetric(vertical: 8.0),
-                  color: Colors.blue,  // Fond du box
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      "Nom de l'utilisateur: $userName",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          // Si l'utilisateur n'existe pas, afficher le bouton pour créer un utilisateur
-          if (!userExists && !isLoading)
-            Align(
-              alignment: Alignment.bottomRight,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Container(
-                  padding: EdgeInsets.symmetric(vertical: 8.0),
-                  child: ButtonTheme.fromButtonThemeData(
-                    data: ButtonTheme.of(context).copyWith(
-                      buttonColor: Colors.blue,
-                      textTheme: ButtonTextTheme.primary,
-                    ),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        createLog(context);
-                      },
-                      child: Text('Créer un utilisateur'),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          // Afficher un indicateur de chargement pendant la création de l'utilisateur
-          if (isLoading)
-            Center(child: CircularProgressIndicator()),
         ],
       ),
-    );
-  }
 
-  // Afficher un dialogue pour saisir un nom d'utilisateur
-  void createLog(BuildContext context) {
-    String title = '';
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: Text('Écrivez votre nom'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    onChanged: (value) {
-                      title = value;
+      body: FutureBuilder<List<Habit>>(
+        future: habits,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(child: Text('No habits found'));
+          } else {
+            return ListView.builder(
+              physics: BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()), // Toujours scrollable + effet de rebond
+              itemCount: snapshot.data!.length,
+              itemBuilder: (context, index) {
+                final habit = snapshot.data![index];
+                return ListTile(
+                  title: HabitBox(
+                    habit: habit,
+                    habitController: widget.habitController,
+                  ),
+                  trailing: _isDeleteMode
+                      ? IconButton(
+                    icon: Icon(Icons.delete),
+                    onPressed: () async {
+                      await widget.habitController.deleteHabit(habit);
+                      _loadHabits();
                     },
-                    decoration: InputDecoration(hintText: 'Votre nom'),
-                  ),
-                  SizedBox(height: 20),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            if (title.isNotEmpty) {
-                              setState(() {
-                                isLoading = true; // Afficher un indicateur de chargement
-                              });
-                              try {
-                                await widget.userController.createUser(title);
-                                // Attendre la création avant de fermer la fenêtre de dialogue
-                                await _checkUserExists();  // Recharger les informations sur l'utilisateur
-                                Navigator.pop(context);
-                                setState(() {
-                                  userExists = true; // L'utilisateur est créé
-                                  userName = title;  // Mettre à jour le nom de l'utilisateur
-                                  isLoading = false; // Cacher l'indicateur de chargement
-                                });
-                              } catch (e) {
-                                // Gérer une erreur éventuelle
-                                setState(() {
-                                  isLoading = false;
-                                });
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text("Erreur lors de la création de l'utilisateur")),
-                                );
-                              }
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text("Veuillez entrer un nom")),
-                              );
-                            }
-                          },
-                          child: Text('Créer'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                  )
+                      : null,
+                );
+              },
             );
-          },
-        );
-      },
+
+          }
+        },
+      ),
+
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          final Habit? newHabit = await Navigator.push<Habit>(
+            context,
+            MaterialPageRoute(builder: (context) => AddHabitPage()),
+          );
+
+          if (newHabit != null) {
+            await widget.habitController.addHabit(newHabit);
+            _loadHabits();
+          }
+        },
+        child: Icon(Icons.add),
+
+      ),
     );
   }
 }
