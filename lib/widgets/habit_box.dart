@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import '../models/habit.dart';
-import '../controllers/habit_controller.dart';
+import '../controllers/appcontroller.dart';
 
 class HabitBox extends StatefulWidget {
   final Habit habit;
-  final HabitController habitController;
+  final AppController appController;
 
-  HabitBox({required this.habit, required this.habitController});
+  HabitBox({required this.habit, required this.appController});
 
   @override
   _HabitBoxState createState() => _HabitBoxState();
@@ -60,8 +60,8 @@ class _HabitBoxState extends State<HabitBox> {
 
   @override
   Widget build(BuildContext context) {
-    final name = widget.habitController.getHabitName(widget.habit);
-    final history = widget.habitController.getHistory(widget.habit);  // Utilisation de la méthode getHistory
+    final name = widget.appController.getHabitName(widget.habit);
+    final history = widget.appController.getHistory(widget.habit);
     final streak = _calculateStreak(history);
     final today = DateTime.now();
     final weekDays = List.generate(7, (index) => currentWeekStart.add(Duration(days: index)));
@@ -69,12 +69,12 @@ class _HabitBoxState extends State<HabitBox> {
     return GestureDetector(
       onHorizontalDragEnd: (details) {
         if (details.primaryVelocity! < 0) {
-          _changeWeek(7); // Swipe gauche -> Semaine suivante
+          _changeWeek(7);
         } else if (details.primaryVelocity! > 0) {
-          _changeWeek(-7); // Swipe droite -> Semaine précédente
+          _changeWeek(-7);
         }
       },
-      child: SingleChildScrollView(  // Ajout du Scroll View pour permettre le défilement
+      child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -97,7 +97,7 @@ class _HabitBoxState extends State<HabitBox> {
                   children: List.generate(7, (index) {
                     final currentDate = weekDays[index];
                     final formattedDate = DateTime(currentDate.year, currentDate.month, currentDate.day); // Ignore l'heure
-                    final isCompleted = history[formattedDate] ?? false; // Si c'est marqué comme true dans history
+                    final isCompleted = history[formattedDate] ?? false;
                     final isFuture = currentDate.isAfter(today);
 
                     return Expanded(
@@ -154,22 +154,24 @@ class _HabitBoxState extends State<HabitBox> {
                     ElevatedButton(
                       onPressed: () {
                         if (_selectedDate != null) {
-                          widget.habitController.markDay(widget.habit, _selectedDate!, false);
+                          widget.appController.markDay(widget.habit, _selectedDate!, false);
                           setState(() {
                             _showActionBar = false;
                           });
                         }
+                        _selectedDate = null;
                       },
                       child: Text('Action 1'),
                     ),
                     ElevatedButton(
                       onPressed: () {
                         if (_selectedDate != null) {
-                          widget.habitController.markDay(widget.habit, _selectedDate!, true);
+                          widget.appController.markDay(widget.habit, _selectedDate!, true);
                           setState(() {
                             _showActionBar = false;
                           });
                         }
+                        _selectedDate = null;
                       },
                       child: Text('Action 2'),
                     ),

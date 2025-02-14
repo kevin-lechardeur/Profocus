@@ -79,17 +79,11 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     _pages = [
-      HomePage(habitController: HabitController()),
+      HomePage(appController: AppController()),
       TendancePage(userController: UserController()),
-      CalendarPage(
-        calendarController: CalendarController(),
-        appController: AppController(),
-      ),
-      TransactionPage(transactionController: TransactionController()),
-      ProfilePage(
-        habitController: HabitController(),
-        transactionController: TransactionController(),
-      ),
+      CalendarPage(appController: AppController()),
+      TransactionPage(appController: AppController(),),
+      ProfilePage(appController: AppController()),
     ];
   }
 

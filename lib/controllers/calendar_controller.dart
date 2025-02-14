@@ -12,8 +12,6 @@ class CalendarController {
 
   Future<void> addEvent(Event event) async {
       await _eventBox?.add(event);
-      //print('Event added  ${event.title}');
-      //print('Event added  ${event.startTime}');
   }
 
   List<Event> getEvents() {

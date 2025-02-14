@@ -5,10 +5,6 @@ import '../models/transaction_category.dart';
 class TransactionController {
   Box<Transaction>? _transactionBox;
 
-  TransactionController() {
-    _initBox();
-  }
-
   Future<void> _initBox() async {
     _transactionBox = await Hive.openBox<Transaction>('transaction');
   }
@@ -28,6 +24,12 @@ class TransactionController {
   // Récupérer toutes les transactions
   List<Transaction> getTransactions() {
     return _transactionBox?.values.toList() ?? [];
+  }
+  String getNameTransaction(Transaction transaction) {
+    return transaction.name;
+  }
+  String getDateTransaction(Transaction transaction) {
+    return transaction.getDateTransaction();
   }
 
   // Récupérer les transactions par catégorie
@@ -97,6 +99,12 @@ class TransactionController {
   // Récupérer le type de la transaction (revenu ou dépense)
   bool getTransactionType(Transaction transaction) {
     return transaction.typeTransaction;
+  }
+
+  String getTransactionCategory(Transaction transaction) {
+    print(transaction.categorie.name);
+
+    return transaction.categorie.name;
   }
   List<Transaction> getTransactionsByMonth(DateTime date) {
     return _transactionBox?.values

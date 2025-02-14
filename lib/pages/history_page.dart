@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import '../controllers/transaction_controller.dart';
+import '../controllers/appcontroller.dart';
 import '../models/transaction.dart';
+import '../widgets/transaction_tile.dart';
 
 class HistoryPage extends StatefulWidget {
-  final TransactionController transactionController;
+  final AppController appController;
   final DateTime date;
 
-  HistoryPage({required this.transactionController, required this.date});
+  HistoryPage({required this.appController, required this.date});
 
   @override
   _HistoryStatePage createState() => _HistoryStatePage();
@@ -18,16 +19,20 @@ class _HistoryStatePage extends State<HistoryPage> {
   @override
   void initState() {
     super.initState();
-    transactions = widget.transactionController.getTransactionsByMonth(widget.date);
-    transactions.sort((a, b) => a.date.compareTo(b.date));
+    loadTransactions();
+  }
+
+  void loadTransactions() {
+    setState(() {
+      transactions = widget.appController.getTransactionsByMonth(widget.date);
+      transactions.sort((a, b) => a.date.compareTo(b.date));
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Historique des transactions"),
-      ),
+      appBar: AppBar(title: Text("Historique des transactions")),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
@@ -44,16 +49,16 @@ class _HistoryStatePage extends State<HistoryPage> {
               child: ListView.builder(
                 itemCount: transactions.length,
                 itemBuilder: (context, index) {
-                  Transaction transaction = transactions[index];
-                  return Card(
-                    margin: EdgeInsets.symmetric(vertical: 5),
-                    child: ListTile(
-                      title: Text(transaction.name),
-                      subtitle: Text("Catégorie: ${transaction.categorie}"),
-                      trailing: Text("\$${transaction.montant}"),
-                      onTap: () {
-                      },
-                    ),
+                  return TransactionTile(
+                    transaction: transactions[index],
+                    appController: widget.appController,
+                    onDelete: () {
+                      widget.appController.deleteTransaction(transactions[index]);
+                      loadTransactions();
+                    },
+                    onTap: () {
+                      print("Transaction sélectionnée : ${transactions[index].name}");
+                    },
                   );
                 },
               ),

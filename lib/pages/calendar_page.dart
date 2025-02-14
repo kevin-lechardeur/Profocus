@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../controllers/calendar_controller.dart';
 import '../controllers/appcontroller.dart';
 import '../models/event.dart';
 import '../widgets/calendar_event_tile.dart';
 
 class CalendarPage extends StatefulWidget {
-  final CalendarController calendarController;
   final AppController appController;
-  CalendarPage({required this.calendarController, required this.appController});
+  CalendarPage({required this.appController});
 
 
   @override
@@ -22,7 +20,7 @@ class _CalendarPageState extends State<CalendarPage> {
   @override
   void initState() {
     super.initState();
-    widget.calendarController.openBox().then((_) {
+    widget.appController.openBoxCalendar().then((_) {
       _loadEvents();
     });
   }
@@ -30,10 +28,7 @@ class _CalendarPageState extends State<CalendarPage> {
   void _loadEvents() {
     setState(() {
       DateTime today = DateTime.now();
-      _events = widget.calendarController
-          .getEvents()
-          .where((event) => event.startTime.isAfter(today) || _isSameDay(event.startTime, today))
-          .toList();
+      _events = widget.appController.getEvents().where((event) => event.startTime.isAfter(today) || _isSameDay(event.startTime, today)).toList();
       _events.sort((a, b) => a.startTime.compareTo(b.startTime));
     });
   }
@@ -87,14 +82,14 @@ class _CalendarPageState extends State<CalendarPage> {
           ...entry.value.map((event) {
             return CalendarEventTile(
               key: ValueKey(event.startTime.millisecondsSinceEpoch.toString() + event.title),
-              calendarController: widget.calendarController,
+              appController: widget.appController,
               event: event,
               onDelete: () async {
-                await widget.calendarController.deleteEvent(event);
+                await widget.appController.deleteEvent(event);
                 _loadEvents();
               },
               onToggleCompletion: () async {
-                await widget.calendarController.EventBool(event);
+                await widget.appController.EventBool(event);
                 _loadEvents();
               },
             );
@@ -150,7 +145,7 @@ class _CalendarPageState extends State<CalendarPage> {
                     startTime: DateTime(selectedDate.year, selectedDate.month, selectedDate.day, 0, 0),
                     endTime: DateTime(selectedDate.year, selectedDate.month, selectedDate.day, 23, 59),
                   );
-                  widget.calendarController.addEvent(newEvent).then((_) {
+                  widget.appController.addEvent(newEvent).then((_) {
                     _loadEvents();
                     Navigator.pop(context);
                   });

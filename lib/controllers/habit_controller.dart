@@ -81,14 +81,13 @@ class HabitController {
 
   // Marquer un jour comme fait ou non.
   Future<void> markDay(Habit habit, DateTime date, bool isDone) async {
-    // Vérifie si l'objet est déjà dans Hive
+    final normalizedDate = DateTime(date.year, date.month, date.day);
     if (!habit.isInBox) {
       var box = Hive.box<Habit>('habit');
-      int key = await box.add(habit); // Ajoute l'objet dans Hive
-      habit = box.get(key)!; // Récupère l'objet depuis Hive
+      int key = await box.add(habit);
+      habit = box.get(key)!;
     }
-
-    habit.markDay(date, isDone);
+    habit.markDay(normalizedDate, isDone);
     await habit.save();
   }
 

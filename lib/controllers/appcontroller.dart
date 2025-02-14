@@ -62,6 +62,92 @@ class AppController extends ChangeNotifier {
     await _saveTheme(); // Sauvegarde la préférence dans Hive
     notifyListeners();
   }
+  
+  
+  //HABIT FONCTIONS
+  Future<void> openBoxHabit() async {
+    await habitController.openBox();
+  }
+  Future<List<Habit>> getHabit() async {
+    return habitController.getAllHabits();
+  }
+  Future<void> addHabit(Habit habit) async {
+    await habitController.addHabit(habit);
+  }
+  Future<void> deleteHabit(Habit habit) async {
+    await habitController.deleteHabit(habit);
+  }
+  String getHabitName(Habit habit) {
+    return habitController.getHabitName(habit);
+  }
+  Map<DateTime, bool> getHistory(Habit habit) {
+    return habitController.getHistory(habit);
+  }
+  Future<void> markDay(Habit habit, DateTime date, bool isDone) async {
+    await habitController.markDay(habit, date, isDone);
+  }
+  Habit? getHabitAvecLePlusDeJoursFaits() {
+    return habitController.getHabitAvecLePlusDeJoursFaits();
+  }
+  int getNombreConsecutive(Habit habit) {
+    return habitController.getNombreConsecutive(habit);
+  }
+
+
+
+  // CALENDAR FONCTIONS
+  Future<void> openBoxCalendar() async {
+    await calendarController.openBox();
+  }
+  List<Event> getEvents()  {
+    return calendarController.getEvents();
+  }
+  Future<void>deleteEvent(Event event) async {
+    await calendarController.deleteEvent(event);
+  }
+  Future<void> EventBool(Event event) async {
+    await calendarController.EventBool(event);
+  }
+  String getTitle(Event event) {
+    return calendarController.getTitle(event);
+  }
+  bool isEventFinished(Event event) {
+    return calendarController.isEventFinished(event);
+  }
+  Future<void> addEvent(Event event) async {
+    await calendarController.addEvent(event);
+  }
+
+
+
+
+  //TRANSACTION FONCTIONS
+  Future<void> openBoxTransaction() async {
+    await transactionController.openBox();
+  }
+  List<Transaction> getTransactions() {
+    return transactionController.getTransactions();
+  }
+  Future<void> addTransaction(Transaction transaction) async {
+    await transactionController.addTransaction(transaction);
+  }
+  List<Transaction> getTransactionsByMonth(DateTime date){
+    return transactionController.getTransactionsByMonth(date);
+  }
+  String getNameTransaction(Transaction transaction) {
+    return transactionController.getNameTransaction(transaction);
+  }
+  String getTransactionCategory(Transaction transaction) {
+    return transactionController.getTransactionCategory(transaction);
+  }
+  String getDateTransaction(Transaction transaction) {
+    return transactionController.getDateTransaction(transaction);
+  }
+  Future<void>  deleteTransaction(Transaction transaction) async {
+    await transactionController.deleteTransaction(transaction);
+  }
+
+
 
   // Retourner le thème actuel en fonction de _isDarkMode
   ThemeData get currentTheme {

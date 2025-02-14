@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:project/controllers/transaction_controller.dart';
-import '../controllers/habit_controller.dart';
-import '../controllers/transaction_controller.dart';
+import '../controllers/appcontroller.dart';
 import 'history_page.dart';
 import '../models/habit.dart';
 class ProfilePage extends StatefulWidget {
-  final HabitController habitController;
-  final TransactionController transactionController;
+  final AppController appController;
 
-  ProfilePage({required this.habitController, required this.transactionController});
+  ProfilePage({required this.appController});
 
   @override
   _ProfileStatePage createState() => _ProfileStatePage();
@@ -19,10 +17,7 @@ class _ProfileStatePage extends State<ProfilePage> {
   List<String> getLastMonths() {
     List<String> months = [];
     DateTime now = DateTime.now();
-
-    // Ajout des 4 derniers mois, y compris le mois actuel
     for (int i = 0; i < 4; i++) {
-      // On obtient le mois en prenant l'année et le mois actuel - i
       DateTime month = DateTime(now.year, now.month - i, 1);
       String monthName = _getMonthName(month.month);
       months.add(monthName);
@@ -30,8 +25,6 @@ class _ProfileStatePage extends State<ProfilePage> {
 
     return months;
   }
-
-  // Fonction pour obtenir le nom du mois en fonction de son numéro
   String _getMonthName(int monthNumber) {
     switch (monthNumber) {
       case 1:
@@ -62,22 +55,17 @@ class _ProfileStatePage extends State<ProfilePage> {
         return "Mois";
     }
   }
-
-  // Fonction pour obtenir la DateTime du premier jour du mois sélectionné
   DateTime getFirstDayOfMonth(String monthName) {
     int monthNumber = _getMonthNumber(monthName);
     DateTime now = DateTime.now();
-
-    // Si le mois sélectionné est après le mois actuel, on prend l'année précédente
     int year = now.year;
     if (monthNumber > now.month) {
-      year = now.year - 1; // L'année du mois doit être l'année précédente
+      year = now.year - 1;
     }
 
-    return DateTime(year, monthNumber, 1); // DateTime avec le premier jour du mois
+    return DateTime(year, monthNumber, 1);
   }
 
-  // Fonction pour obtenir le numéro du mois en fonction de son nom
   int _getMonthNumber(String monthName) {
     switch (monthName) {
       case "Janvier":
@@ -111,7 +99,7 @@ class _ProfileStatePage extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    Habit? habit = widget.habitController.getHabitAvecLePlusDeJoursFaits();
+    Habit? habit = widget.appController.getHabitAvecLePlusDeJoursFaits();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -131,8 +119,8 @@ class _ProfileStatePage extends State<ProfilePage> {
             child: habit == null
                 ? Text("Aucune habitude n'a été ajoutée")
                 : Text(
-              "${widget.habitController.getHabitName(habit)} - L'habitude + fait "
-                  "\nMax Streak : ${widget.habitController.getNombreConsecutive(habit)}",
+              "${widget.appController.getHabitName(habit)} - L'habitude + fait "
+                  "\nMax Streak : ${widget.appController.getNombreConsecutive(habit)}",
               style: TextStyle(color: Colors.white),
             ),
           ),
@@ -159,7 +147,7 @@ class _ProfileStatePage extends State<ProfilePage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => HistoryPage(
-                            transactionController : widget.transactionController,
+                            appController : widget.appController,
                             date: selectedDate)
                         ),
                       );

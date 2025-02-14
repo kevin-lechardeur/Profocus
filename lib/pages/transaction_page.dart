@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import '../models/transaction.dart';
 import '../models/transaction_category.dart';
-import '../controllers/transaction_controller.dart';
+import '../controllers/appcontroller.dart';
 import '../widgets/add_transaction.dart';
 
 class TransactionPage extends StatefulWidget {
-  final TransactionController transactionController;
-  TransactionPage({required this.transactionController});
+  final AppController appController;
+  TransactionPage({required this.appController});
   @override
   _TransactionPageState createState() => _TransactionPageState();
 }
@@ -18,11 +18,13 @@ class _TransactionPageState extends State<TransactionPage> {
   @override
   void initState() {
     super.initState();
-    _reloadTransactions();
+    widget.appController.openBoxTransaction().then((_) {
+      _reloadTransactions();
+    });
   }
 
   void _reloadTransactions() async {
-    final updatedTransactions = await widget.transactionController.getTransactions();
+    final updatedTransactions = await widget.appController.getTransactions();
     setState(() {
       transactions = updatedTransactions;
     });
@@ -127,7 +129,7 @@ class _TransactionPageState extends State<TransactionPage> {
           );
 
           if (newTransaction != null) {
-            await widget.transactionController.addTransaction(newTransaction);
+            await widget.appController.addTransaction(newTransaction);
             _reloadTransactions();
           }
         },

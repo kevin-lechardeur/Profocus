@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:project/controllers/appcontroller.dart';
 import '../models/habit.dart';
 import '../widgets/habit_box.dart';
 import '../controllers/habit_controller.dart';
 import '../widgets/add_habit.dart';
 
 class HomePage extends StatefulWidget {
-  final HabitController habitController;
-  HomePage({required this.habitController});
+  final AppController appController ;
+  HomePage({required this.appController,});
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -19,14 +20,14 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    widget.habitController.openBox().then((_) {
+    widget.appController.openBoxHabit().then((_) {
       _loadHabits();
     });
   }
 
   void _loadHabits() {
     setState(() {
-      habits = widget.habitController.getHabit();
+      habits = widget.appController.getHabit();
     });
   }
 
@@ -67,13 +68,13 @@ class _HomePageState extends State<HomePage> {
                 return ListTile(
                   title: HabitBox(
                     habit: habit,
-                    habitController: widget.habitController,
+                    appController: widget.appController,
                   ),
                   trailing: _isDeleteMode
                       ? IconButton(
                     icon: Icon(Icons.delete),
                     onPressed: () async {
-                      await widget.habitController.deleteHabit(habit);
+                      await widget.appController.deleteHabit(habit);
                       _loadHabits();
                     },
                   )
@@ -94,7 +95,7 @@ class _HomePageState extends State<HomePage> {
           );
 
           if (newHabit != null) {
-            await widget.habitController.addHabit(newHabit);
+            await widget.appController.addHabit(newHabit);
             _loadHabits();
           }
         },

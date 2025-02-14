@@ -1,6 +1,9 @@
 import 'package:hive/hive.dart';
 import 'transaction_category.dart';
+import 'package:intl/intl.dart';
 part 'transaction.g.dart';
+
+
 
 @HiveType(typeId: 3)
 class Transaction {
@@ -51,8 +54,8 @@ class Transaction {
     this.categorie = categorie;
   }
 
-  DateTime getDateTransaction(){
-    return date;
+  String getDateTransaction() {
+    return DateFormat('yyyy/MM/dd').format(date);
   }
   String getMonth(){
     return date.month.toString().padLeft(2, '0');
