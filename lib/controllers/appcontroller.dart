@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'user_controller.dart';
 import 'calendar_controller.dart';
 import 'habit_controller.dart';
 import 'transaction_controller.dart';
-import '../models/user.dart';
 import '../models/event.dart';
 import '../models/habit.dart';
 import '../models/transaction.dart';
 import '../models/transaction_category.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 
 class AppController extends ChangeNotifier {
-  final UserController userController = UserController();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   final CalendarController calendarController = CalendarController();
   final HabitController habitController = HabitController();
   final TransactionController transactionController = TransactionController();
@@ -28,7 +28,6 @@ class AppController extends ChangeNotifier {
   }
 
   Future<void> init() async {
-    await userController.openBox();
     await calendarController.openBox();
     await habitController.openBox();
     await transactionController.openBox();
@@ -145,6 +144,23 @@ class AppController extends ChangeNotifier {
   }
   Future<void>  deleteTransaction(Transaction transaction) async {
     await transactionController.deleteTransaction(transaction);
+  }
+
+  //FIREBASE FONCTIONS
+  Future<void> signOut() async {
+    await FirebaseAuth.instance.signOut();
+  }
+
+  Future<void> signIn(String email, String password) async {
+    try {
+      await _auth.signInWithEmailAndPassword(
+        email: email.trim(),
+        password: password.trim(),
+      );
+      notifyListeners(); // 🔄 Notifie l'UI si nécessaire
+    } catch (e) {
+      throw Exception("Erreur de connexion : ${e.toString()}");
+    }
   }
 
 

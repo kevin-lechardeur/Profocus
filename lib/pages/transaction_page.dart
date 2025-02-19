@@ -71,21 +71,20 @@ class _TransactionPageState extends State<TransactionPage> {
                   majorTickLines: MajorTickLines(width: 0), // Masque les marques de l'axe des Y
                   labelFormat: '', // Masque les labels (0%, 25%, 50%, etc.)
                 ),
-                series: <ChartSeries>[
+                series: <CartesianSeries<MapEntry<TransactionCategory, double>, String>>[
                   StackedBar100Series<MapEntry<TransactionCategory, double>, String>(
                     dataSource: categoryTotals.entries.toList(),
                     xValueMapper: (MapEntry<TransactionCategory, double> data, _) => data.key.name, // Nom de la catégorie
                     yValueMapper: (MapEntry<TransactionCategory, double> data, _) {
                       double percentage = (data.value / totalExpenses) * 100;
-                      double roundedPercentage = percentage.roundToDouble();
-                      return roundedPercentage;
+                      return percentage.roundToDouble();
                     },
-                    pointColorMapper: (MapEntry<TransactionCategory, double> data, _) => data.key.color, // Couleur de chaque barre
+                    pointColorMapper: (MapEntry<TransactionCategory, double> data, _) => data.key.color, // Couleur
                     name: 'Dépenses par catégorie',
                     dataLabelSettings: DataLabelSettings(
                       isVisible: true,
                       labelAlignment: ChartDataLabelAlignment.top,
-                      textStyle: TextStyle(color: Colors.white), // Définit la couleur des labels en blanc
+                      textStyle: TextStyle(color: Colors.white),
                     ),
                   ),
                 ],

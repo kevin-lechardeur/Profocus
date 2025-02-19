@@ -12,7 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
   fl_chart: ^0.69.2
-  intl: ^0.17.0
+  intl: ^0.20.2
   hive: ^2.0.4
   hive_flutter: ^1.1.0
   path_provider: ^2.0.2
@@ -20,6 +20,10 @@ dependencies:
   provider: 6.1.2
   shared_preferences: ^2.2.2
   firebase_core: ^3.11.0
+  firebase_auth: ^5.4.2
+  google_sign_in: ^6.2.2
+  font_awesome_flutter: ^10.8.0
+  google_fonts : ^6.2.1
 
 dev_dependencies:
   flutter_test:
@@ -27,8 +31,8 @@ dev_dependencies:
   flutter_lints: ^5.0.0
   build_runner: ^2.1.7
   hive_generator: ^1.1.1
-  syncfusion_flutter_charts: ^20.1.50
-  syncfusion_flutter_core: ^20.1.50
+  syncfusion_flutter_charts: ^28.2.6
+  syncfusion_flutter_core: ^28.2.6
 flutter:
   uses-material-design: true
   assets:
@@ -40,6 +44,10 @@ flutter:
     - assets/fonts/Alkalami/PTSerif-BoldItalic.ttf
     - assets/fonts/Alkalami/PTSerif-Italic.ttf
     - assets/fonts/Alkalami/PTSerif-Regular.ttf
+    - assets/image/student.png
+    - assets/image/logoApple.png
+    - assets/image/groupe.png
+    - assets/image/googleLogo.png
   fonts:
     - family: Montserrat
       fonts:
@@ -53,3 +61,4 @@ flutter:
         - asset: assets/fonts/Alkalami/PTSerif-BoldItalic.ttf
         - asset: assets/fonts/Alkalami/PTSerif-Italic.ttf
         - asset: assets/fonts/Alkalami/PTSerif-Regular.ttf
+

@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
 import '../widgets/line_chart_widget.dart';
 import '../widgets/cube_grid.dart';
-import '../controllers/user_controller.dart';
 
 class TendancePage extends StatefulWidget {
-  final UserController userController;
-
-  TendancePage({required this.userController});
 
   @override
   _TendancePageState createState() => _TendancePageState();
@@ -20,20 +16,7 @@ class _TendancePageState extends State<TendancePage> {
   @override
   void initState() {
     super.initState();
-    _checkUserExists();
   }
-
-  // Vérifier si un utilisateur existe
-  Future<void> _checkUserExists() async {
-    await widget.userController.openBox();
-    setState(() {
-      userExists = widget.userController.isUserAlreadyExists();
-      if (userExists) {
-        userName = widget.userController.getUserName(); // Récupérer le nom de l'utilisateur si disponible
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,7 +38,6 @@ class _TendancePageState extends State<TendancePage> {
                     ),
                   ),
                 ),
-                Container(height: 200, child: LineChartWidget(userController: widget.userController)),
                 Container(child: CubeGrid()),
               ],
             ),

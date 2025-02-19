@@ -17,6 +17,17 @@ class SettingsPage extends StatelessWidget {
             value: appController.isDarkMode,
             onChanged: (value) => appController.toggleTheme(),
           ),
+          ButtonBar(
+            children: [
+              ElevatedButton(
+                onPressed: () async {
+                  await appController.signOut();
+                  Navigator.pushReplacementNamed(context, '/');
+                },
+                child: Text("Se déconnecter"),
+              ),
+            ],
+          ),
         ],
       ),
     );

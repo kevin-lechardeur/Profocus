@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1028349888674",
+    "project_id": "profocusv1",
+    "storage_bucket": "profocusv1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1028349888674:android:dd67affd2677de8b17effb",
+        "android_client_info": {
+          "package_name": "fr.profocus.project"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBtCN8hWzZypYUR__FKrvs3XA7hNDqq9Io"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
